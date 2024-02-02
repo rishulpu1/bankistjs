@@ -79,18 +79,18 @@ const calcDisplayBalance = function(movements){
   const balance = movements.reduce((acc, mov) => acc + mov,0);
   labelBalance.innerHTML = `${balance}€`;
 }
-calcDisplayBalance(account1.movements);
 
-const calcDisplaySummary = function(movements){
-  const sumIn = movements.filter(mov => mov >= 0).reduce((acc, mov) => acc + mov, 0);
-  const sumOut = movements.filter(mov => mov < 0).reduce((acc, mov) => acc + mov, 0);
-  const interest = movements.filter(mov => mov > 0).map(mov => mov * 1.2/100).reduce((acc, int) => acc + int,0);
+
+const calcDisplaySummary = function(acc){
+  const sumIn = acc.movements.filter(mov => mov >= 0).reduce((acc, mov) => acc + mov, 0);
+  const sumOut = acc.movements.filter(mov => mov < 0).reduce((acc, mov) => acc + mov, 0);
+  const interest = acc.movements.filter(mov => mov > 0).map(mov => mov * acc.interestRate/100).reduce((acc, int) => acc + int,0);
   labelSumIn.textContent = `${sumIn}€`;
   labelSumOut.textContent = `${Math.abs(sumOut)}€`;
   labelSumInterest.textContent = `${interest}€`;
 }
-calcDisplaySummary(account1.movements);
-displayMovements(account1.movements);
+
+
 const createUsername = (accs) => {
   accs.forEach(acc => {
     acc.userName = acc.owner
@@ -102,6 +102,28 @@ const createUsername = (accs) => {
 }
 createUsername(accounts);
 console.log(accounts);
+let currentAccount;
+btnLogin.addEventListener('click', function(e){
+  e.preventDefault();
+  currentAccount = accounts.find(acc => acc.userName === inputLoginUsername.value);
+  console.log(currentAccount);
+  if(currentAccount?.pin === Number(inputLoginPin.value)){
+    // Display Name And UI
+    labelWelcome.textContent = `Welcome back, ${currentAccount.owner.split(' ')[0]}`;
+    containerApp.style.opacity = 1;
+    inputLoginUsername.value = inputLoginPin.value = '';
+    inputLoginPin.blur();
+
+    // Display Movements
+    displayMovements(currentAccount.movements);
+
+    // Display Balance
+    calcDisplayBalance(currentAccount.movements);
+
+    //Display Summary
+    calcDisplaySummary(currentAccount);
+  }
+})
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
