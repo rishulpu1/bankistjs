@@ -199,7 +199,25 @@ const updateUi = function (acc) {
   calcDisplaySummary(acc);
 };
 console.log(accounts);
-let currentAccount;
+
+let currentAccount, timer;
+const setLogoutTimer = function(){
+  let time = 120;
+  const tick = function(){
+    const min = String(Math.trunc(time / 60)).padStart(2, 0);
+    const sec = String(time % 60).padStart(2, 0);
+    labelTimer.textContent = `${min}:${sec}`;
+    
+    if(time === 0){
+      clearInterval(timer);
+      labelWelcome.textContent = `Log in to get started`;
+      containerApp.style.opacity = 0;
+    }
+    time--;
+  }
+  const timer = setInterval(tick ,1000);
+  return timer;
+}
 btnLogin.addEventListener('click', function (e) {
   e.preventDefault();
   currentAccount = accounts.find(
@@ -214,13 +232,22 @@ btnLogin.addEventListener('click', function (e) {
     containerApp.style.opacity = 1;
     inputLoginUsername.value = inputLoginPin.value = '';
     inputLoginPin.blur();
-    const dateNow = new Date();
+    
+    setInterval(function(){
+      const dateNow = new Date();
     const day = `${dateNow.getDate()}`.padStart(2, 0);
     const month = `${dateNow.getMonth() + 1}`.padStart(2, 0);
     const year = `${dateNow.getFullYear()}`;
-    const hours = `${dateNow.getHours()}`.padStart(2, 0);
-    const min = `${dateNow.getMinutes()}`.padStart(2, 0);
-    labelDate.textContent = `${day}/${month}/${year}, ${hours}:${min}`;
+    
+    
+      const hours = `${dateNow.getHours()}`.padStart(2, 0);
+      const min = `${dateNow.getMinutes()}`.padStart(2, 0);
+      const sec = `${dateNow.getSeconds()}`.padStart(2, 0);
+      labelDate.textContent = `${day}/${month}/${year}, ${hours}:${min}:${sec}`;
+    }, 1000);
+    if(timer) clearInterval(timer);
+    timer = setLogoutTimer();
+    
     //Update UI
     updateUi(currentAccount);
   }
@@ -246,6 +273,10 @@ btnTransfer.addEventListener('click', function (e) {
     updateUi(currentAccount);
   }
   inputTransferAmount.value = inputTransferTo.value = '';
+
+  //Reset Timer
+  clearInterval(timer);
+  timer = setLogoutTimer();
 });
 
 btnLoan.addEventListener('click', function (e) {
@@ -257,6 +288,9 @@ btnLoan.addEventListener('click', function (e) {
     updateUi(currentAccount);
   }
   inputLoanAmount.value = '';
+  //Reset Timer
+  clearInterval(timer);
+  timer = setLogoutTimer();
 });
 
 btnClose.addEventListener('click', function (e) {
